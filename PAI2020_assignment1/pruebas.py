@@ -22,40 +22,57 @@ import sys
 ##########################
 ###### PARSE DATA ########
 ##########################
-possible_goals = [(15,19),(6,7),(7,7),(8,8),(9,9)]
+sheep_position = (19,15,0)
+possible_goals = [(15,19,1),(6,7,2),(7,7,3),(8,8,4),(9,9,5)]
 value = 5
 
 class GameNode:
-    def __init__(self, name, value=0, parent=None):
+    def __init__(self, value, parent, tupla):
         #self.Name = name      # a char, puede que no necesitemos nombre.
         self.value = value    # an int
         self.parent = parent  # a node reference
         self.children = []    # a list of nodes
+        self.tupla = tupla
 
     def addChild(self, childNode):
         self.children.append(childNode)
 
+    def toArray(self):
+    	print("a")
+    	if len(self.children) == 0:
+    		return tupla
+    	else:
+    		aux = []
+    		for child in self.children:
+    			aux.append(child)
+    		return aux
+
+
+
 class GameTree:
     def __init__(self):
-        self.root = None
+    	self.root = None
 
-    def build_tree(self, data_list,): #here we are gonna introduce the list
+    def build_tree(self, data_list, sheep_position): #here we are gonna introduce the list
         """
         :param data_list: Take data in list format
         :return: Parse a tree from it
         """
-       	self.root = GameNode(data_list[0]) # la raiz sera posicion de la primera oveja.
+       	self.root = GameNode(2, None, sheep_position) # la raiz sera posicion de la primera oveja.
         for elem in data_list:
-            self.parse_subtree(data_list.remove(data_list[0]), self.root)
+        	auxlist = data_list
+        	auxlist.remove(elem)
+        	#print(elem)
+        	#print(auxlist)
+        	self.parse_subtree(auxlist, self.root)
 
     def parse_subtree(self, data_list, parent):
         # base case
+        #print(data_list)
         if len(data_list)==1: #if it is the last element of the list we have a leaf
-	        if type(data_list) is tuple:
+	        if type(data_list[0]) is tuple:
 	            # make connections
-	            leaf_node = GameNode(data_list[0]) #we create the node 
-	            leaf_node.parent = parent
-	            leaf_node.value= value  #establish the node 
+	            leaf_node = GameNode(data_list[0][2], parent, data_list[0]) #we create the node 
 	            parent.addChild(leaf_node) # we add the node to the tree
 	            # if we're at a leaf, set the value
 	            #if len(data_list) == 2:
@@ -63,21 +80,21 @@ class GameTree:
 	            return
 
         # recursive case
-        tree_node = GameNode(data_list.pop())
-        # make connections
-        tree_node.parent = parent
-        parent.addChild(tree_node)
+        
         for elem in data_list:
-            self.parse_subtree(elem, tree_node)
+        	auxlist = data_list
+        	auxlist.remove(elem)
+        	print(data_list[0])
+        	tree_node = GameNode(0, parent, data_list[0])
+	        parent.addChild(tree_node)
+        	self.parse_subtree(auxlist, tree_node)
 
         # return from entire method if base case and recursive case both done running
         return
 
-    def __repr__(self, level=0):
-        ret = "\t"*level+repr(self.value)+"\n"
-        for child in self.children:
-            ret += child.__repr__(level+1)
-        return ret
+
+    def toArray(self):
+    	return self.root.toArray()
 
 
 ##########################
@@ -86,9 +103,8 @@ class GameTree:
 
 def main():
     data_tree = GameTree()
-    data_tree.build_tree(possible_goals)
-    str(data_tree)
-    print(data_tree)
+    data_tree.build_tree(possible_goals, sheep_position)
+    print(data_tree.toArray())
 
 if __name__ == "__main__":
     main()
