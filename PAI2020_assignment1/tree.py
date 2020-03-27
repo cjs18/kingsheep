@@ -71,10 +71,8 @@ class GameTree:
         :return: Parse a tree from it
         """
        	self.root = GameNode(data_list[0],data_list[0]) #the first possition of the list will be the root
-        auxlist = data_list
-        auxlist.remove(data_list[0]) #remove the first element 
-        #for elem in auxlist:
-        self.sub_tree(auxlist, self.root)
+        data_list.remove(data_list[0]) #remove the first element 
+        self.sub_tree(data_list, self.root)
     
     def sub_tree(self, data_list,parent):
         if len(data_list)==0:
@@ -83,7 +81,7 @@ class GameTree:
             tree_node = GameNode(parent,data_list[0])
             print('El nodo hoja:', tree_node.getValue(), 'ha sido añadido al padre:', parent.getValue())
             parent.addChild(tree_node) # We add a leaf in the tree
-
+            return
         #if the list contain more than one node: 
         x=0
         for elem in data_list:
@@ -92,12 +90,12 @@ class GameTree:
             parent.addChild(tree_node)
             print('El nodo:', tree_node.getValue(), 'ha sido añadido al padre:', parent.getValue())
             x+=1
-            if len(auxlist)>=2:
-                auxlist.remove(tree_node.getValue())
-                print(auxlist)
-                print('Esta es la nueva lista que estoy pasando: ', auxlist)
-                print('--- FIN LOOP ---')
-                self.sub_tree(auxlist,tree_node)
+            #if len(auxlist)>=2:
+            auxlist.remove(tree_node.getValue())
+            print(auxlist)
+            print('Esta es la nueva lista que estoy pasando: ', auxlist)
+            print('--- FIN LOOP ---')
+            self.sub_tree(auxlist,tree_node)
        
 
     
@@ -121,7 +119,7 @@ class GameTree:
             while(not queue.empty()): 
                 x = queue.get()
                 print('child')
-                print(x.getValue())
+                print(x.getValue(),x.getParent().getValue())
 
                 for elem in x.getChildren():
                     queue.put(elem)
