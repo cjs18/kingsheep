@@ -20,15 +20,16 @@ from ast import literal_eval
 import sys
 
 
+
 ##########################
 ###### PARSE DATA ########
 ##########################
-possible_goals = ['A','B','C','D']
+possible_goals = [(13,19),(4,3),(2,5),(2,4),(5,6),(7,9)]
 
 class GameNode:
-    def __init__(self, parent,value):
+    def __init__(self, parent):
         #self.Name = name      # a char, puede que no necesitemos nombre.
-        self.value = value    # an int
+        self.value = None    # an int
         self.parent = parent  # a node reference
         self.children = []    # a list of nodes
         #self.tupla = tupla
@@ -43,20 +44,7 @@ class GameNode:
         return self.children
     def getParent(self): 
         return self.parent
-            
-    def toArray(self):
-    	print("root")
-    	if len(self.children) == 0:
-    		return 0
-    	else:
-    		aux = []
-    		for child in self.children:
-    			aux.append(child)
-    		return aux
-    def isEmpty(self): 
-        return len(self.root)==0 
-    
-   
+           
 class GameTree:
     def __init__(self):        
     	self.root = None
@@ -65,7 +53,6 @@ class GameTree:
         return self.root
         
     def build_tree(self, data_list): #here we are gonna introduce the list
-
         """
         :param data_list: Take data in list format
         :return: Parse a tree from it
@@ -128,6 +115,84 @@ class GameTree:
         for elem in self.root:
             print(elem.value())
 
+class AlphaBeta:
+    # print utility value of root node (assuming it is max)
+    # print names of all nodes visited during search
+    def __init__(self, game_tree):
+        self.game_tree = game_tree  # GameTree
+        self.root = game_tree.getRoot()  # GameNode
+        
+    def getRoota(self): 
+        return self.root.getValue()
+    def getRoot(self): 
+        return self.root
+
+    def is_leaf(self,node): 
+        return len(node.getChildren())==0 
+
+    def alpha_beta_search(self, node):
+        infinity = float('inf') #unbounded upper value for comparison
+        best_val = -infinity  #alpha 
+        beta = infinity       #beta 
+
+        successors = node.getChildren()
+        best_state = None
+        for state in successors:
+            value = self.min_value(state, best_val, beta)
+            if value > best_val:
+                best_val = value
+                best_state = state
+        print('AlphaBeta:  Utility Value of Root Node: = ' , str(best_val))
+        print('AlphaBeta:  Best State is: ' , best_state.getValue())
+        return best_state
+
+    def max_value(self, node, alpha, beta):
+        print("AlphaBeta-->MAX: Visited Node :: " , node.getValue()) 
+        if self.is_leaf(node): #if is_leaf(node)
+            return node.getValue() # return the value
+        infinity = float('inf') 
+        value = -infinity               #v =-infinite 
+
+        successors = node.getChildren()
+        for state in successors:    #for each child of node 
+            value = max(value, self.min_value(state, alpha, beta))
+            if value >= beta:
+                return value  #here is the prune 
+            alpha = max(alpha, value) #best already explored option root for the maximizer
+        return value
+
+    def min_value(self, node, alpha, beta):
+        print('AlphaBeta-->MIN: Visited Node :: ' , node.getValue()) 
+        if self.is_leaf(node):
+            return node.getValue()
+        infinity = float('inf')
+        value = infinity # v= infinite
+
+        successors = node.getChildren()
+        for state in successors:
+            value = min(value, self.max_value(state, alpha, beta))
+            if value <= alpha:
+                return value       #prune
+            beta = min(beta, value) #best already explored option for the minimizer
+
+        return value
+    #                     #
+    #   UTILITY METHODS   #
+    #                     #
+
+    # successor states in a game tree are the child nodes...
+    """def getSuccessors(self, node):
+        node.getChildren()"""
+
+    # return true if the node has NO children (successor states)
+    # return false if the node has children (successor states)
+    def isTerminal(self, node):
+        assert node is not None
+        return len(node.children) == 0
+
+    """def getUtility(self, node):
+        assert node is not None
+        return node.value"""
 
                          
 ##########################
@@ -139,6 +204,15 @@ def main():
     data_tree.build_tree(possible_goals)
     #print(data_tree.toArray())
     data_tree.searchtree()
+    busqueda = AlphaBeta(data_tree)
+    print(busqueda.getRoota())
+    root =busqueda.getRoot()
+    print(root)
+    busqueda.alpha_beta_search(root)
+    #alpha_beta_search(busqueda.getRoota())
    
 if __name__ == "__main__":
     main()
+
+    # llamar getsuccesors al metodo get children.
+
