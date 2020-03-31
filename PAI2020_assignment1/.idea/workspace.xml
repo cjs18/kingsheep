@@ -1,7 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="2c950da9-b90b-42f5-9cd9-6d7abd9b6e4a" name="Default Changelist" comment="" />
+    <list default="true" id="2c950da9-b90b-42f5-9cd9-6d7abd9b6e4a" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MyAgent.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/[clsant]A1.py" beforeDir="false" afterPath="$PROJECT_DIR$/[clsant]A1.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/kingsheep.py" beforeDir="false" afterPath="$PROJECT_DIR$/kingsheep.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tree.py" beforeDir="false" afterPath="$PROJECT_DIR$/tree.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -114,6 +120,7 @@
       <workItem from="1584544107089" duration="8118000" />
       <workItem from="1584699225343" duration="4520000" />
       <workItem from="1584807777560" duration="1234000" />
+      <workItem from="1585575922896" duration="4404000" />
     </task>
     <servers />
   </component>
@@ -130,6 +137,10 @@
     <option name="version" value="1" />
   </component>
   <component name="WindowStateProjectService">
+    <state x="233" y="0" key="#Inspections" timestamp="1585586273357">
+      <screen x="0" y="0" width="1280" height="680" />
+    </state>
+    <state x="233" y="0" key="#Inspections/0.0.1280.680@0.0.1280.680" timestamp="1585586273357" />
     <state x="130" y="0" key="SettingsEditor" timestamp="1584545722580">
       <screen x="0" y="0" width="1280" height="680" />
     </state>

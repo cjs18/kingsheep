@@ -5,6 +5,7 @@ import time
 import os.path
 from config import *
 import arcade
+from tree import *
 from multiprocessing import Pool, TimeoutError
 
 

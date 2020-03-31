@@ -24,15 +24,16 @@ import sys
 ##########################
 ###### PARSE DATA ########
 ##########################
-possible_goals = [(13,19),(4,3),(2,5),(2,4),(5,6),(7,9)]
+possible_goals = [(5,5,9),(3,3,5),(8,8,2),(2,2,4)]
 
 class GameNode:
-    def __init__(self, parent):
-        #self.Name = name      # a char, puede que no necesitemos nombre.
+    def __init__(self, parent,x,y):
+        
         self.value = None    # an int
         self.parent = parent  # a node reference
         self.children = []    # a list of nodes
-        #self.tupla = tupla
+        self.x = x
+        self.y = y
 
     def addChild(self, childNode):
         self.children.append(childNode)
@@ -44,7 +45,11 @@ class GameNode:
         return self.children
     def getParent(self): 
         return self.parent
-           
+    def getX(self):
+        return self.x
+    def getY(self):
+        return self.y
+            
 class GameTree:
     def __init__(self):        
     	self.root = None
@@ -53,42 +58,45 @@ class GameTree:
         return self.root
         
     def build_tree(self, data_list): #here we are gonna introduce the list
+
         """
         :param data_list: Take data in list format
         :return: Parse a tree from it
         """
-       	self.root = GameNode(data_list[0],data_list[0]) #the first possition of the list will be the root
+       	self.root = GameNode(data_list[0],data_list[0][1],data_list[0][0]) #the first possition of the list will be the root
         data_list.remove(data_list[0]) #remove the first element 
+        #print(self.root.getX())
+        #print(self.root.getY())
+        #print(type(self.root))  type node  
         self.sub_tree(data_list, self.root)
     
     def sub_tree(self, data_list,parent):
-        if len(data_list)==0:
+        if len(data_list)==0: #in case our list is empty
             return
         if len(data_list)==1:
-            tree_node = GameNode(parent,data_list[0])
-            print('El nodo hoja:', tree_node.getValue(), 'ha sido añadido al padre:', parent.getValue())
+            tree_node = GameNode(parent,data_list[0][1],data_list[0][0])
+            
+            tree_node.addValue(data_list[0][2]) #we only add value to the node is a leaf 
+            
+            #print('El nodo hoja:', tree_node.getValue(), 'ha sido añadido al padre:', parent.getValue())
+            
             parent.addChild(tree_node) # We add a leaf in the tree
             return
         #if the list contain more than one node: 
         x=0
         for elem in data_list:
             auxlist= data_list.copy()
-            tree_node = GameNode(parent,data_list[x])
+            tree_node = GameNode(parent,data_list[x][1],data_list[x][0])
             parent.addChild(tree_node)
-            print('El nodo:', tree_node.getValue(), 'ha sido añadido al padre:', parent.getValue())
+            #print('El nodo:', tree_node.getValue(), 'ha sido añadido al padre:', parent.getValue())
+            auxlist.remove(auxlist[x])
             x+=1
-            #if len(auxlist)>=2:
-            auxlist.remove(tree_node.getValue())
-            print(auxlist)
-            print('Esta es la nueva lista que estoy pasando: ', auxlist)
-            print('--- FIN LOOP ---')
+            #auxlist.remove(tree_node.getValue()) # voy a tener problemas con esta linea 
+            #print(auxlist)
+            #print('Esta es la nueva lista que estoy pasando: ', auxlist)
+            #print('--- FIN LOOP ---')
             self.sub_tree(auxlist,tree_node)
-       
 
-    
-
-    def toArray(self):
-    	return self.root.toArray()
     
     def searchtree(self):
         
@@ -96,24 +104,21 @@ class GameTree:
 
         if not(self.root==None): 
             rot= self.getRoot()
-            print(rot.getValue())
+            print(rot.getX(),rot.getY())
             aux= rot.getChildren()
             for i in aux:
-                print(i.getValue())
+                print(i.getX())
             print('Hasta aqui los hijos del root')
             for elem in aux: 
                 queue.put(elem)
             while(not queue.empty()): 
                 x = queue.get()
                 print('child')
-                print(x.getValue(),x.getParent().getValue())
+                print(x.getX(),x.getY(),'padre',x.getParent().getX(),x.getParent().getY())
 
                 for elem in x.getChildren():
                     queue.put(elem)
 
-    def imprimir(self):
-        for elem in self.root:
-            print(elem.value())
 
 class AlphaBeta:
     # print utility value of root node (assuming it is max)
@@ -123,7 +128,7 @@ class AlphaBeta:
         self.root = game_tree.getRoot()  # GameNode
         
     def getRoota(self): 
-        return self.root.getValue()
+        return self.root.getX()
     def getRoot(self): 
         return self.root
 
@@ -136,18 +141,19 @@ class AlphaBeta:
         beta = infinity       #beta 
 
         successors = node.getChildren()
-        best_state = None
+        best_state = None          #it has to be node type 
         for state in successors:
             value = self.min_value(state, best_val, beta)
             if value > best_val:
                 best_val = value
                 best_state = state
+        print(type(best_state))
         print('AlphaBeta:  Utility Value of Root Node: = ' , str(best_val))
-        print('AlphaBeta:  Best State is: ' , best_state.getValue())
+        print('AlphaBeta:  Best State is: ' , best_state.getX())
         return best_state
 
     def max_value(self, node, alpha, beta):
-        print("AlphaBeta-->MAX: Visited Node :: " , node.getValue()) 
+        print("AlphaBeta-->MAX: Visited Node :: " , '(',node.getX(),node.getY(),')') 
         if self.is_leaf(node): #if is_leaf(node)
             return node.getValue() # return the value
         infinity = float('inf') 
@@ -162,7 +168,7 @@ class AlphaBeta:
         return value
 
     def min_value(self, node, alpha, beta):
-        print('AlphaBeta-->MIN: Visited Node :: ' , node.getValue()) 
+        print('AlphaBeta-->MIN: Visited Node :: ' ,'(',node.getX(),node.getY(),')') 
         if self.is_leaf(node):
             return node.getValue()
         infinity = float('inf')

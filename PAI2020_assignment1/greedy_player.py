@@ -41,13 +41,15 @@ class GreedyPlayer:
             sheep_position = self.get_player_position(CELL_SHEEP_2,field)
 
         #make list of possible goals
-
+        x= 0
         y_position = 0
         for line in field:
             x_position = 0
             for item in line:
                 if item == CELL_RHUBARB or item == CELL_GRASS:
                     possible_goals.append((y_position,x_position))
+                    print(type(possible_goals))
+                    print(type(possible_goals[0]))
                 x_position += 1
             y_position += 1
 

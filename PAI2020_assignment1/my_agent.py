@@ -7,10 +7,10 @@ from tree import *
 
 
 def get_class_name():
-    return 'MyFAgent'
+    return 'blabla'
 
 
-class MyFAgent:
+class blabla:
     """Example class for a Kingsheep player"""
 
     def __init__(self):
@@ -22,10 +22,12 @@ class MyFAgent:
         return (field.index(x), x.index(figure))
 
     """ index() function which searches for given element from start of the list and
-     returns the lowest index where the element appears. return = (y,x) where the figure was found"""
-    
+     returns the lowest index where the element appears"""
+    """guarda x en x si la figura esta en x"""
 
     # defs for sheep
+    """comprueba si hay comida aun"""
+
     def food_present(self, field):
         food_present = False
 
@@ -36,51 +38,67 @@ class MyFAgent:
                     break
         return food_present
 
-    """look for all the Rhubarb and Grass and keep it in a list of tuples (x,y,v) where the x and y are the parametres for the position of 
-        the item and v is the value that represents the distance to the item"""
-    def possible_goals(self, player_number, field):
+    # empezar a modificar este subprograma
+    def closest_goal(self, player_number, field):
         possible_goals = []
-        leng =5 
 
         if player_number == 1:
             sheep_position = self.get_player_position(CELL_SHEEP_1, field)
         else:
             sheep_position = self.get_player_position(CELL_SHEEP_2, field)
 
+        # make list of possible goals
+        # inicia las variables x e y to 0
+
         y_position = 0
         for line in field:
             x_position = 0
             for item in line:
                 if item == CELL_RHUBARB or item == CELL_GRASS:
-                    value =abs(y_position-sheep_position[0])+abs(x_position -sheep_position[1])
-                    if item == CELL_RHUBARB:
-                        value -= 1  # Rhubanrd is more value than grass distances care less
-                    possible_goals.append((y_position, x_position, value))#we add the tupple to the list we will parser later
+                    possible_goals.append((y_position, x_position))
                 x_position += 1
             y_position += 1
-        short_list = []
-        x= 0
-        for elem in possible_goals:
-            if len(short_list)<leng:
-                short_list.append(possible_goals[x])
-                print(possible_goals[x])
-            else: 
-                y=0
-                for elem in short_list: 
-                    if possible_goals[x][2]<short_list[y][2]:
-                        short_list[y]=possible_goals[x]
-                    y+=1
-            x+=1
+        # si encuentra comida añade la posicion a la lista de posible goals si no aumenta posicion y continua buscando
+        # determine closest item and return
+        # parte a modificar (strategy).
+        distance = 1000
+        for possible_goal in possible_goals:
+            if (abs(possible_goal[0] - sheep_position[0]) + abs(possible_goal[1] - sheep_position[1])) < distance:
+                distance = abs(possible_goal[0] - sheep_position[0]) + abs(possible_goal[1] - sheep_position[1])
+                final_goal = (possible_goal)
 
+        return final_goal
 
-        short_list.insert(0, (0,0,0))#we add a first element we are not going to check as a root
+    def possible_goals(self, player_number, field):
+        possible_goals = []
 
-        return short_list 
+        if player_number == 1:
+            sheep_position = self.get_player_position(CELL_SHEEP_1, field)
+        else:
+            sheep_position = self.get_player_position(CELL_SHEEP_2, field)
+
+        #possible_goals.append(sheep_position)  # is gonna be our root later for the tree
+        # make list of possible goals
+        # inicia las variables x e y to 0
+
+        y_position = 0
+        for line in field:
+            x_position = 0
+            for item in line:
+                if item == CELL_RHUBARB or item == CELL_GRASS:
+                    distance =abs(y_position-sheep_position[0])+abs(x_position -sheep_position[1])
+                    if item == CELL_RHUBARB:
+                        distance = distance - 2  # Rhubanrd is more value than grass distances care less
+                    possible_goals.append((y_position, x_position, distance))
+                x_position += 1
+            y_position += 1
+        possible_goals.insert(0, (0,0,0)) #this gonna be the root of our tree 
+        return possible_goals 
 
     def gather_closest_goal(self, closest_goal, field, figure):  # closest_goal will be a node type
-        # takes player position
+        # coje la posicion del jugador
         figure_position = self.get_player_position(figure, field)
-        
+        # coge los valores a la inversa
         distance_x = figure_position[1] - closest_goal[1]
         distance_y = figure_position[0] - closest_goal[0]
 
@@ -91,7 +109,7 @@ class MyFAgent:
                 if self.valid_move(figure, figure_position[0] - 1, figure_position[1], field):
                     return MOVE_UP
                 else:
-                    return MOVE_RIGHT  
+                    return MOVE_RIGHT  # no entiendo porque lo mueve a la derecha, porque no a la izquierda
             else:
                 if self.valid_move(figure, figure_position[0] + 1, figure_position[1], field):
                     return MOVE_DOWN
@@ -144,10 +162,11 @@ class MyFAgent:
                 # print('fail')
                 return MOVE_NONE
 
-    def gather_closest_goalS(self, closest_goal, field, figure): # closest_goal will be a node type
-        # takes player position
+    def gather_closest_goalS(self, closest_goal, field, figure):
+        # coje la posicion del jugador
         figure_position = self.get_player_position(figure, field)
-        print(type(closest_goal))
+        # coge los valores a la inversa
+
         distance_x = figure_position[1] - closest_goal.getX()
         distance_y = figure_position[0] - closest_goal.getY()
 
@@ -157,7 +176,7 @@ class MyFAgent:
                 if self.valid_move(figure, figure_position[0] - 1, figure_position[1], field):
                     return MOVE_UP
                 else:
-                    return MOVE_RIGHT  
+                    return MOVE_RIGHT  # no entiendo porque lo mueve a la derecha, porque no a la izquierda
             else:
                 if self.valid_move(figure, figure_position[0] + 1, figure_position[1], field):
                     return MOVE_DOWN
@@ -352,38 +371,18 @@ class MyFAgent:
             return MOVE_NONE
 
     def move_sheep(self, p_num, p_state, p_time_remaining, field):
-        
         if p_num == 1:
             figure = CELL_SHEEP_1
         else:
             figure = CELL_SHEEP_2
-        #We prioritize running away from the wolf:
+
         if self.wolf_close(p_num, field):
             move = self.run_from_wolf(p_num, field)
-
-        elif self.food_present(field) and (p_time_remaining> 0) :
-            print('a')
+        elif self.food_present(field):
             data_tree = GameTree()
-            print(type(data_tree))
-            print('b')
-            l = self.possible_goals(p_num, field)
-            print(len(l))
-            data_tree.build_tree(l)
-            x=0
-            for elem in l: 
-                print(l[x])
-                x+=1 
-            print(type(l))
-            print(type(l[0]))
-
-            data_tree.build_tree(l)
-            print('c')
+            data_tree.build_tree(self.possible_goals(p_num, field))
             busqueda = AlphaBeta(data_tree)  # return the most efficient node
-            root =busqueda.getRoot()
-            print('d')
-            print(type(root))
-            move = self.gather_closest_goalS(busqueda.alpha_beta_search(root), field, figure)
-            
+            move = self.gather_closest_goalS(busqueda, field, figure)
 
         else:
             move = MOVE_NONE
