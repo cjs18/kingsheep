@@ -3,7 +3,205 @@ Kingsheep Agent Template
 """
 
 from config import *
-from tree import *
+
+
+"""code for parsing a List into a tree """
+
+""" @author Claudia Jurado Santos
+    @email tony@tonypoer.io
+    
+    tree_parser.py --> parse a list into a tree.
+                       Only leaf nodes have values.
+                       I'm intending to running minimax algorithms on these trees for a competitive game AI
+    
+    Data should be in the following format: 
+    [(x,y,v),(x,y,v)...(x,y,v)] being X and Y the coordinates and x the value of the node. 
+    
+    Note that Leaves must be **tuples**
+    
+    Usage:  python tree_parser.py [filename]
+        File should have data in the format shown above. 
+"""
+from queue import SimpleQueue
+from ast import literal_eval
+import sys
+
+
+
+##########################
+###### PARSE DATA ########
+##########################
+possible_goals= [(0, 0, 0), (2, 4, 2), (2, 5, 3), (2, 6, 4), (2, 12, 10),(4, 5, 6)]
+
+class GameNode:
+    def __init__(self, parent,x,y):
+        
+        self.value = None    # an int
+        self.parent = parent  # a node reference
+        self.children = []    # a list of nodes
+        self.x = x
+        self.y = y
+
+    def addChild(self, childNode):
+        self.children.append(childNode)
+    def addValue(self, val):
+        self.value = val
+    def getValue(self):
+        return self.value 
+    def getChildren(self): 
+        return self.children
+    def getParent(self): 
+        return self.parent
+    def getX(self):
+        return self.x
+    def getY(self):
+        return self.y
+            
+class GameTree:
+    def __init__(self):        
+        self.root = None
+
+    def getRoot(self):
+        return self.root
+        
+    def build_tree(self, data_list): #here we are gonna introduce the list
+
+        """
+        :param data_list: Take data in list format
+        :return: Parse a tree from it
+        """
+        self.root = GameNode(data_list[0],data_list[0][1],data_list[0][0]) #the first possition of the list will be the root
+        data_list.remove(data_list[0]) #remove the first element 
+        self.sub_tree(data_list, self.root)
+    
+    def sub_tree(self, data_list,parent):
+        if len(data_list)==0: #in case our list is empty
+            return
+        if len(data_list)==1:
+            tree_node = GameNode(parent,data_list[0][1],data_list[0][0])
+            tree_node.addValue(data_list[0][2]) #we only add value to the node is a leaf 
+            parent.addChild(tree_node) # We add a leaf in the tree
+            return
+        #if the list contain more than one node: 
+        x=0
+        for elem in data_list:
+            auxlist= data_list.copy()
+            tree_node = GameNode(parent,data_list[x][1],data_list[x][0])
+            parent.addChild(tree_node)
+            auxlist.remove(auxlist[x])
+            x+=1
+            self.sub_tree(auxlist,tree_node)
+
+    
+    def searchtree(self):  #method used to check if the tree was corrected implemented
+        
+        queue = SimpleQueue()
+
+        if not(self.root==None): 
+            rot= self.getRoot()
+            print(rot.getX(),rot.getY())
+            aux= rot.getChildren()
+            for i in aux:
+                print(i.getX())
+            print('Hasta aqui los hijos del root')
+            for elem in aux: 
+                queue.put(elem)
+            while(not queue.empty()): 
+                x = queue.get()
+                print('child')
+                print(x.getX(),x.getY(),'padre',x.getParent().getX(),x.getParent().getY())
+
+                for elem in x.getChildren():
+                    queue.put(elem)
+
+
+class AlphaBeta:
+    # print utility value of root node (assuming it is max)
+    # print names of all nodes visited during search
+    def __init__(self, game_tree):
+        self.game_tree = game_tree  # GameTree
+        self.root = game_tree.getRoot()  # GameNode
+        
+    def getRootX(self): 
+        return self.root.getX()
+    def getRootY(self): 
+        return self.root.getY()
+
+    def getRoot(self): 
+        return self.root
+
+    def is_leaf(self,node): 
+        return len(node.getChildren())==0 
+
+    def alpha_beta_search(self, node):
+        infinity = float('inf') #unbounded upper value for comparison
+        best_val = -infinity  #alpha 
+        beta = infinity       #beta 
+
+        successors = node.getChildren()
+        best_state = None          #it has to be node type 
+        for state in successors:
+            value = self.min_value(state, best_val, beta)
+            if value > best_val:
+                best_val = value
+                best_state = state
+        
+        #print('AlphaBeta:  Utility Value of Root Node: = ' , str(best_val))
+        #print('AlphaBeta:  Best State is: ' , best_state.getX())
+        return best_state
+
+    def max_value(self, node, alpha, beta):
+        #print("AlphaBeta-->MAX: Visited Node :: " , '(',node.getX(),node.getY(),')') 
+        if self.is_leaf(node): #if is_leaf(node)
+            return node.getValue() # return the value
+        infinity = float('inf') 
+        value = -infinity               #v =-infinite 
+
+        successors = node.getChildren()
+        for state in successors:    #for each child of node 
+            value = max(value, self.min_value(state, alpha, beta))
+            if value >= beta:
+                return value  #here is the prune 
+            alpha = max(alpha, value) #best already explored option root for the maximizer
+        return value
+
+    def min_value(self, node, alpha, beta):
+        #print('AlphaBeta-->MIN: Visited Node :: ' ,'(',node.getX(),node.getY(),')') 
+        if self.is_leaf(node):
+            return node.getValue()
+        infinity = float('inf')
+        value = infinity # v= infinite
+
+        successors = node.getChildren()
+        for state in successors:
+            value = min(value, self.max_value(state, alpha, beta))
+            if value <= alpha:
+                return value       #prune
+            beta = min(beta, value) #best already explored option for the minimizer
+
+        return value
+    #                     #
+    #   UTILITY METHODS   #
+    #                     #
+
+    # successor states in a game tree are the child nodes...
+    """def getSuccessors(self, node):
+        node.getChildren()"""
+
+    # return true if the node has NO children (successor states)
+    # return false if the node has children (successor states)
+    def isTerminal(self, node):
+        assert node is not None
+        return len(node.children) == 0
+
+    """def getUtility(self, node):
+        assert node is not None
+        return node.value"""
+
+                         
+##########################
+#### class_name ####
+##########################
 
 
 def get_class_name():
@@ -40,7 +238,7 @@ class MyFAgent:
         the item and v is the value that represents the distance to the item"""
     def possible_goals(self, player_number, field):
         possible_goals = []
-        leng =5 
+        leng =6 
 
         if player_number == 1:
             sheep_position = self.get_player_position(CELL_SHEEP_1, field)
@@ -63,7 +261,7 @@ class MyFAgent:
         for elem in possible_goals:
             if len(short_list)<leng:
                 short_list.append(possible_goals[x])
-                print(possible_goals[x])
+                
             else: 
                 y=0
                 for elem in short_list: 
@@ -147,7 +345,6 @@ class MyFAgent:
     def gather_closest_goalS(self, closest_goal, field, figure): # closest_goal will be a node type
         # takes player position
         figure_position = self.get_player_position(figure, field)
-        print(type(closest_goal))
         distance_x = figure_position[1] - closest_goal.getX()
         distance_y = figure_position[0] - closest_goal.getY()
 
@@ -362,27 +559,19 @@ class MyFAgent:
             move = self.run_from_wolf(p_num, field)
 
         elif self.food_present(field) and (p_time_remaining> 0) :
-            print('a')
-            data_tree = GameTree()
-            print(type(data_tree))
-            print('b')
-            l = self.possible_goals(p_num, field)
-            print(len(l))
+            data_tree = GameTree() #we create the tree in wich we are gonna look for the best possition to reach
+            l = self.possible_goals(p_num, field) # list with len 5 to parse the tree
+            print(l)
             data_tree.build_tree(l)
             x=0
             for elem in l: 
                 print(l[x])
                 x+=1 
-            print(type(l))
-            print(type(l[0]))
-
+            
             data_tree.build_tree(l)
-            print('c')
-            busqueda = AlphaBeta(data_tree)  # return the most efficient node
+            busqueda = AlphaBeta(data_tree)  
             root =busqueda.getRoot()
-            print('d')
-            print(type(root))
-            move = self.gather_closest_goalS(busqueda.alpha_beta_search(root), field, figure)
+            move = self.gather_closest_goalS(busqueda.alpha_beta_search(root), field, figure) # return the most efficient node
             
 
         else:
